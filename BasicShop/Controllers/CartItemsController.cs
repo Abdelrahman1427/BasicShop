@@ -73,6 +73,7 @@ namespace BasicShop.Controllers
                 return NotFound();
             }
 
+            product.Qty += cartItem.Quantity;
             _context.CartItems.Remove(cartItem);
             await _context.SaveChangesAsync();
 
