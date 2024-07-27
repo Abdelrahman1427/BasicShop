@@ -42,7 +42,20 @@ namespace BasicShop.Controllers
         [HttpPost]
         public async Task<ActionResult<CartItem>> PostCartItem(CartItem cartItem)
         {
+            var product = await _context.Products.FindAsync(cartItem.ProductId);
+            if (product == null)
+            {
+                return NotFound("Product not found.");
+            }
+            // Check if there is enough quantity
+            if (product.Qty < cartItem.Quantity)
+            {
+                return BadRequest("Not enough product quantity available.");
+            }
+
             _context.CartItems.Add(cartItem);
+            product.Qty -= cartItem.Quantity; // Reduce the product quantity
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetCartItem", new { id = cartItem.Id }, cartItem);
@@ -56,8 +69,30 @@ namespace BasicShop.Controllers
             {
                 return BadRequest();
             }
+            var existingCartItem = await _context.CartItems.FindAsync(id);
+            if (existingCartItem == null)
+            {
+                return NotFound();
+            }
 
-            _context.Entry(cartItem).State = EntityState.Modified;
+            var product = await _context.Products.FindAsync(cartItem.ProductId);
+            if (product == null)
+            {
+                return NotFound("Product not found.");
+            }
+            int quantityDifference = cartItem.Quantity - existingCartItem.Quantity;
+
+            if (product.Qty < quantityDifference)
+            {
+                return BadRequest("Not enough product quantity available.");
+            }
+
+            // Update cart item
+            _context.Entry(existingCartItem).State = EntityState.Modified;
+            existingCartItem.Quantity = cartItem.Quantity; // Update quantity
+
+            // Update product quantity
+            product.Qty -= quantityDifference; // Reduce the product quantity
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -67,15 +102,23 @@ namespace BasicShop.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCartItem(int id)
         {
-            var cartItem = await _context.CartItems.FindAsync(id);
-            if (cartItem == null)
-            {
-                return NotFound();
-            }
+    var cartItem = await _context.CartItems.FindAsync(id);
+    if (cartItem == null)
+    {
+        return NotFound();
+    }
 
-            product.Qty += cartItem.Quantity;
-            _context.CartItems.Remove(cartItem);
-            await _context.SaveChangesAsync();
+    var product = await _context.Products.FindAsync(cartItem.ProductId);
+    if (product == null)
+    {
+        return NotFound("Product not found.");
+    }
+
+    // Increase product quantity
+    product.Qty += cartItem.Quantity;
+
+    _context.CartItems.Remove(cartItem);
+    await _context.SaveChangesAsync();
 
             return NoContent();
         }

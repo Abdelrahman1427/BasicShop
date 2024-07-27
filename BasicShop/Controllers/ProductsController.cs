@@ -67,12 +67,24 @@ namespace BasicShop.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
+            // Find the product in the database
             var product = await _context.Products.FindAsync(id);
             if (product == null)
             {
                 return NotFound();
             }
 
+            // Remove the product from the cart items
+            var cartItems = await _context.CartItems
+                                           .Where(ci => ci.ProductId == id)
+                                           .ToListAsync();
+
+            if (cartItems.Any())
+            {
+                _context.CartItems.RemoveRange(cartItems);
+            }
+
+            // Remove the product
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
 
@@ -83,7 +95,7 @@ namespace BasicShop.Controllers
         public async Task<ActionResult<IEnumerable<Product>>> GetVisibleProducts()
         {
             var visibleProducts = await _context.Products
-                .Where(p => p.IsVisible && p.Qty > 0)
+                .Where(p => p.IsVisible && p.Qty >= 0)
                 .ToListAsync();
 
             return Ok(visibleProducts);
