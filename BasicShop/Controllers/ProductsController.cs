@@ -78,5 +78,16 @@ namespace BasicShop.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("visible")]
+        public async Task<ActionResult<IEnumerable<Product>>> GetVisibleProducts()
+        {
+            var visibleProducts = await _context.Products
+                .Where(p => p.IsVisible && p.Qty > 0)
+                .ToListAsync();
+
+            return Ok(visibleProducts);
+        }
+
     }
 }
