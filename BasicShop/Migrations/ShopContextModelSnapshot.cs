@@ -37,9 +37,7 @@ namespace BasicShop.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("CartItems");
+                    b.ToTable("CartItems", (string)null);
                 });
 
             modelBuilder.Entity("BasicShop.Models.Product", b =>
@@ -65,18 +63,7 @@ namespace BasicShop.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products");
-                });
-
-            modelBuilder.Entity("BasicShop.Models.CartItem", b =>
-                {
-                    b.HasOne("BasicShop.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
+                    b.ToTable("Products", (string)null);
                 });
 #pragma warning restore 612, 618
         }

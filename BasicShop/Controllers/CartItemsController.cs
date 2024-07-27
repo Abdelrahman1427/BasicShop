@@ -1,5 +1,4 @@
 ﻿using BasicShop.Data;
-using BasicShop.DTO;
 using BasicShop.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,19 +19,9 @@ namespace BasicShop.Controllers
 
         // GET: api/CartItems
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CartItemDto>>> GetCartItems()
+        public async Task<ActionResult<IEnumerable<CartItem>>> GetCartItems()
         {
-            var cartItems = await _context.CartItems.Include(c => c.Product).ToListAsync();
-            var cartItemDtos = cartItems.Select(c => new CartItemDto
-            {
-                Id = c.Id,
-                ProductId = c.ProductId,
-                Quantity = c.Quantity,
-                ProductName = c.Product.Name, // Get the product name from the Product entity
-                Price = c.Product.Price // Get the product price if needed
-            }).ToList();
-
-            return cartItemDtos;
+            return await _context.CartItems.ToListAsync();
         }
 
         // GET: api/CartItems/5
